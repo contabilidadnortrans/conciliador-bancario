@@ -1,0 +1,1666 @@
+<title>Conciliador Softland</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --paper:#F6F4F1;
+    --paper-raised:#FFFFFF;
+    --paper-deep:#EFEBE5;
+    --ink:#262626;
+    --ink-soft:#6B6B6B;
+    --line:#E2DCD2;
+    --line-strong:#CFC6B8;
+    --accent:#EF6B00;
+    --accent-hover:#D45E00;
+    --accent-ink:#FFFFFF;
+    --cargo:#A6402F;
+    --cargo-bg:rgba(166,64,47,0.09);
+    --abono:#1E7B4D;
+    --abono-bg:rgba(30,123,77,0.09);
+    --warn:#9c6b1f;
+    --warn-bg:rgba(156,107,31,0.12);
+    --ok:#1E7B4D;
+    --ok-bg:rgba(30,123,77,0.12);
+    --shadow: 0 1px 2px rgba(38,38,38,0.06), 0 6px 20px -10px rgba(38,38,38,0.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#1B1B1B;
+      --paper-raised:#252525;
+      --paper-deep:#2E2E2E;
+      --ink:#EDEDED;
+      --ink-soft:#B3B3B3;
+      --line:#3A3A3A;
+      --line-strong:#4A4A4A;
+      --accent:#FF8A3D;
+      --accent-hover:#FFA35C;
+      --accent-ink:#2B1400;
+      --cargo:#E1826D;
+      --cargo-bg:rgba(225,130,109,0.13);
+      --abono:#59C97F;
+      --abono-bg:rgba(89,201,127,0.13);
+      --warn:#d9a441;
+      --warn-bg:rgba(217,164,65,0.14);
+      --ok:#59C97F;
+      --ok-bg:rgba(89,201,127,0.14);
+      --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 6px 24px -10px rgba(0,0,0,0.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#1B1B1B;
+    --paper-raised:#252525;
+    --paper-deep:#2E2E2E;
+    --ink:#EDEDED;
+    --ink-soft:#B3B3B3;
+    --line:#3A3A3A;
+    --line-strong:#4A4A4A;
+    --accent:#FF8A3D;
+    --accent-hover:#FFA35C;
+    --accent-ink:#2B1400;
+    --cargo:#E1826D;
+    --cargo-bg:rgba(225,130,109,0.13);
+    --abono:#59C97F;
+    --abono-bg:rgba(89,201,127,0.13);
+    --warn:#d9a441;
+    --warn-bg:rgba(217,164,65,0.14);
+    --ok:#59C97F;
+    --ok-bg:rgba(89,201,127,0.14);
+    --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 6px 24px -10px rgba(0,0,0,0.6);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size:14px;
+    line-height:1.5;
+    margin:0;
+    padding:32px 20px 80px;
+  }
+  .wrap{max-width:1000px; margin:0 auto;}
+
+  .brand-logo-wrap{
+    display:inline-flex; align-items:center; background:#FFFFFF; border:1px solid var(--line);
+    border-radius:8px; padding:8px 14px; margin-bottom:14px;
+  }
+  .brand-logo{height:22px; width:auto; display:block;}
+
+  h1{
+    font-family:"IBM Plex Serif", Georgia, "Times New Roman", serif;
+    font-weight:700;
+    font-size:26px;
+    letter-spacing:-0.01em;
+    text-wrap:balance;
+    margin:0 0 2px;
+    color:var(--ink);
+  }
+  .subtitle{color:var(--ink-soft); font-size:13.5px; margin:0 0 24px; max-width:62ch;}
+
+  h2{
+    font-family:"IBM Plex Serif", Georgia, serif;
+    font-weight:600;
+    font-size:15px;
+    margin:0 0 12px;
+    color:var(--ink);
+    display:flex; align-items:baseline; gap:8px;
+  }
+  h2 .num{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    letter-spacing:0.04em;
+  }
+
+  section.card{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:20px 22px;
+    margin-bottom:18px;
+    box-shadow:var(--shadow);
+  }
+
+  /* --- upload bar --- */
+  .upload-row{
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  }
+  .file-btn{
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--accent); color:var(--accent-ink);
+    border:none; border-radius:7px;
+    padding:10px 16px;
+    font-family:"IBM Plex Sans", sans-serif;
+    font-weight:600; font-size:13.5px;
+    cursor:pointer;
+    transition:background .15s ease;
+  }
+  .file-btn:hover{background:var(--accent-hover);}
+  .file-btn input{position:absolute; width:1px; height:1px; opacity:0; overflow:hidden;}
+  .file-status{color:var(--ink-soft); font-size:13px; font-family:"IBM Plex Mono", monospace;}
+  .sheet-picker{font-family:"IBM Plex Mono",monospace; font-size:12.5px; color:var(--ink-soft); display:flex; align-items:center; gap:6px;}
+  select.sheet-select{
+    background:var(--paper); color:var(--ink); border:1px solid var(--line-strong);
+    border-radius:5px; padding:4px 6px; font-family:"IBM Plex Mono",monospace; font-size:12.5px;
+  }
+  .badge-demo{
+    font-family:"IBM Plex Mono", monospace; font-size:11px; letter-spacing:.03em;
+    background:var(--warn-bg); color:var(--warn); border:1px solid currentColor;
+    border-radius:20px; padding:3px 10px; text-transform:uppercase;
+  }
+  .badge-bank{
+    font-family:"IBM Plex Mono", monospace; font-size:11px; letter-spacing:.03em;
+    background:var(--ok-bg); color:var(--ok); border:1px solid currentColor;
+    border-radius:20px; padding:3px 10px; text-transform:uppercase;
+  }
+  details.scotia-details{
+    margin-top:14px; border-top:1px solid var(--line); padding-top:14px;
+  }
+  details.scotia-details summary{
+    cursor:pointer; font-size:12.5px; font-weight:600; color:var(--ink-soft);
+    font-family:"IBM Plex Sans",sans-serif;
+  }
+  details.scotia-details summary:hover{ color:var(--accent); }
+
+  /* --- header/period grid --- */
+  .period-grid{
+    display:grid;
+    grid-template-columns:repeat(6, minmax(0,1fr));
+    gap:14px;
+  }
+  @media (max-width:760px){ .period-grid{grid-template-columns:repeat(2,minmax(0,1fr));} }
+  .field{display:flex; flex-direction:column; gap:5px;}
+  .field label{
+    font-size:10.5px; text-transform:uppercase; letter-spacing:.06em;
+    color:var(--ink-soft); font-weight:500;
+  }
+  .field input{
+    font-family:"IBM Plex Mono", monospace; font-size:13.5px;
+    background:var(--paper); color:var(--ink);
+    border:1px solid var(--line-strong); border-radius:6px;
+    padding:7px 9px; font-variant-numeric:tabular-nums;
+    width:100%;
+  }
+  .field input:focus{outline:2px solid var(--accent); outline-offset:1px;}
+
+  /* --- table --- */
+  .table-scroll{overflow-x:auto; border:1px solid var(--line); border-radius:8px;}
+  table.mov{
+    width:100%; border-collapse:collapse; min-width:850px;
+    font-family:"IBM Plex Mono", monospace; font-size:12.5px;
+  }
+  table.mov thead th{
+    text-align:left; font-family:"IBM Plex Sans", sans-serif; font-weight:600;
+    font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft);
+    background:var(--paper-deep);
+    padding:9px 10px; border-bottom:1px solid var(--line-strong);
+    position:sticky; top:0;
+  }
+  table.mov td{
+    padding:6px 8px; border-bottom:1px solid var(--line);
+    vertical-align:middle;
+  }
+  table.mov tbody tr:hover{background:var(--paper-deep);}
+  table.mov tbody tr.review{box-shadow:inset 3px 0 0 var(--warn);}
+  .col-num{text-align:right; font-variant-numeric:tabular-nums;}
+  td.desc{color:var(--ink-soft); font-size:11.5px; max-width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  table.mov input, table.mov select{
+    font-family:"IBM Plex Mono", monospace; font-size:12.5px;
+    background:transparent; color:var(--ink);
+    border:1px solid transparent; border-radius:4px;
+    padding:4px 5px; width:100%; font-variant-numeric:tabular-nums;
+  }
+  table.mov input:hover, table.mov select:hover{border-color:var(--line-strong);}
+  table.mov input:focus, table.mov select:focus{
+    outline:none; border-color:var(--accent); background:var(--paper);
+  }
+  table.mov input.cargo{color:var(--cargo); text-align:right;}
+  table.mov input.abono{color:var(--abono); text-align:right;}
+  table.mov select.tipo{font-weight:600;}
+  table.mov select.tipo[data-val="CH"]{color:var(--warn);}
+  .rm-btn{
+    background:none; border:1px solid var(--line-strong); color:var(--ink-soft);
+    border-radius:5px; width:24px; height:24px; cursor:pointer; font-size:13px; line-height:1;
+  }
+  .rm-btn:hover{border-color:var(--cargo); color:var(--cargo);}
+  .add-row{
+    margin-top:12px; background:none; border:1px dashed var(--line-strong);
+    color:var(--ink-soft); border-radius:7px; padding:8px 14px;
+    font-family:"IBM Plex Sans",sans-serif; font-size:12.5px; cursor:pointer;
+  }
+  .add-row:hover{border-color:var(--accent); color:var(--accent);}
+  .table-note{font-size:11.5px; color:var(--ink-soft); margin-top:10px; max-width:70ch;}
+
+  /* --- validation --- */
+  .checks{display:flex; gap:10px; flex-wrap:wrap;}
+  .pill{
+    display:flex; align-items:center; gap:8px;
+    border-radius:8px; padding:9px 13px;
+    font-size:12.5px; flex:1; min-width:220px;
+    border:1px solid transparent;
+  }
+  .pill .dot{width:8px; height:8px; border-radius:50%; flex:none;}
+  .pill.ok{background:var(--ok-bg); color:var(--ok); border-color:currentColor;}
+  .pill.ok .dot{background:var(--ok);}
+  .pill.warn{background:var(--warn-bg); color:var(--warn); border-color:currentColor;}
+  .pill.warn .dot{background:var(--warn);}
+  .pill b{font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums;}
+  .pill .lbl{color:var(--ink); font-weight:500;}
+  .pill.ok .lbl, .pill.warn .lbl{color:inherit;}
+
+  /* --- output --- */
+  .out-row{display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; margin-bottom:14px;}
+  .out-row .field{flex:1; min-width:160px;}
+  .out-row .field.grow{flex:2;}
+  .dl-btn{
+    background:var(--accent); color:var(--accent-ink); border:none;
+    border-radius:7px; padding:10px 18px; font-family:"IBM Plex Sans",sans-serif;
+    font-weight:600; font-size:13.5px; cursor:pointer; white-space:nowrap;
+  }
+  .dl-btn:hover{background:var(--accent-hover);}
+  .dl-btn:disabled{opacity:.5; cursor:default;}
+  .copy-btn{
+    background:none; border:1px solid var(--line-strong); color:var(--ink-soft);
+    border-radius:7px; padding:10px 14px; font-family:"IBM Plex Sans",sans-serif;
+    font-size:12.5px; cursor:pointer;
+  }
+  .copy-btn:hover{border-color:var(--accent); color:var(--accent);}
+  textarea.preview{
+    width:100%; min-height:150px; resize:vertical;
+    background:var(--paper-deep); color:var(--ink);
+    border:1px solid var(--line-strong); border-radius:8px;
+    padding:12px 14px; font-family:"IBM Plex Mono",monospace; font-size:12px;
+    white-space:pre; overflow:auto; tab-size:4;
+  }
+  .save-msg{font-size:12px; color:var(--ink-soft); margin-top:8px; min-height:16px;}
+  .save-msg.ok{color:var(--ok);}
+  .save-msg.err{color:var(--cargo);}
+
+  footer.help{
+    font-size:12px; color:var(--ink-soft); line-height:1.6; margin-top:22px; max-width:74ch;
+  }
+  footer.help strong{color:var(--ink);}
+</style>
+
+<div class="wrap">
+  <div class="brand-logo-wrap"><img class="brand-logo" src="data:image/png;base64,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" alt="Nortrans"></div>
+  <h1>Conciliador Softland</h1>
+  <p class="subtitle">Sube la cartola bancaria del mes a conciliar y genera el CSV listo para subir a Softland. Reconoce sola el formato de BCI, Banco de Chile, BancoEstado, Santander e Itaú — para Scotiabank (que solo entrega PDF) pega el texto de la cartola.</p>
+
+  <section class="card">
+    <h2><span class="num">01</span> Cartola</h2>
+    <div class="upload-row">
+      <label class="file-btn">
+        Subir cartola(s) (.xlsx / .xls)
+        <input type="file" id="fileInput" accept=".xlsx,.xls" multiple>
+      </label>
+      <span class="file-status" id="fileStatus">Mostrando el ejemplo de julio 2026 (BCI) — sube tu cartola para reemplazarlo.</span>
+      <span class="badge-demo" id="demoBadge">Ejemplo</span>
+      <span class="badge-bank" id="bankBadge" style="display:none;"></span>
+    </div>
+    <p class="table-note">Sirve para el Excel/xls que descargas directo del sitio del banco (BCI, Banco de Chile "Cartola Emitida", BancoEstado "Cartola Histórica", Santander "Cartola Histórica Cta. Cte." e Itaú Empresas). Para BancoEstado, que entrega las cartolas por semana: puedes seleccionar varias a la vez (Ctrl/Cmd+clic) y la herramienta las junta sola. Si alguna semana cruza dos meses, se queda automáticamente con el mes que tenga más días en esa semana, calculando el saldo anterior justo donde termina el mes anterior — revisa el mensaje que aparece abajo para confirmar qué quedó dentro y qué se excluyó.</p>
+    <details class="scotia-details">
+      <summary>¿Cartola de Scotiabank (PDF)? Pega el texto aquí</summary>
+      <p class="table-note" style="margin-top:8px;">Scotiabank solo entrega la cartola como PDF. Ábrela, selecciona todo el texto (Ctrl/Cmd+A) y cópialo (Ctrl/Cmd+C), luego pégalo abajo.</p>
+      <textarea class="preview" id="scotiaPaste" placeholder="Pega aquí el texto copiado del PDF del Estado de Cuenta de Scotiabank…" style="min-height:100px;"></textarea>
+      <button class="dl-btn" id="scotiaBtn" style="margin-top:10px;">Usar este texto</button>
+    </details>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">02</span> Encabezado del período</h2>
+    <div class="period-grid">
+      <div class="field"><label>Período (mes)</label><input id="f-periodo" /></div>
+      <div class="field"><label>Año</label><input id="f-anio" /></div>
+      <div class="field"><label>Saldo anterior</label><input id="f-saldoAnt" /></div>
+      <div class="field"><label>Primer día</label><input id="f-primerDia" /></div>
+      <div class="field"><label>Último día</label><input id="f-ultimoDia" /></div>
+      <div class="field"><label>Saldo final</label><input id="f-saldoFin" /></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">03</span> Movimientos</h2>
+    <div class="table-scroll">
+      <table class="mov">
+        <thead>
+          <tr>
+            <th style="width:34px;">N°</th>
+            <th style="width:118px;">Fecha</th>
+            <th style="width:64px;">Tipo</th>
+            <th style="width:90px;">N° / Período</th>
+            <th style="width:110px;" class="col-num">Cargo</th>
+            <th style="width:110px;" class="col-num">Abono</th>
+            <th>Descripción (banco, referencia)</th>
+            <th style="width:34px;"></th>
+          </tr>
+        </thead>
+        <tbody id="movBody"></tbody>
+      </table>
+    </div>
+    <button class="add-row" id="addRowBtn">+ Agregar movimiento</button>
+    <p class="table-note">Por defecto todo movimiento se marca <b>T1</b> (transferencia) y en la columna N°/Período repite el número de mes. Si la descripción del banco menciona "cheque", se marca <b>CH</b> automáticamente y se intenta tomar el número desde el N° de documento — esas filas quedan con un borde ámbar a la izquierda: revísalas antes de descargar. Todo el texto es editable directamente en la tabla.</p>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">04</span> Verificación</h2>
+    <div class="checks" id="checks"></div>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">05</span> Descargar</h2>
+    <div class="out-row">
+      <div class="field">
+        <label>Empresa</label>
+        <select id="f-empresa">
+          <option value="NORTRANS">NORTRANS</option>
+          <option value="TAMAF">TAMAF</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Banco</label>
+        <input id="f-banco" value="BCI">
+      </div>
+      <div class="field grow">
+        <label>Nombre de archivo</label>
+        <input id="f-filename" readonly>
+      </div>
+      <button class="dl-btn" id="dlBtn">Descargar CSV</button>
+      <button class="dl-btn" id="dlBtnTxt">Descargar TXT (tabulado)</button>
+      <button class="copy-btn" id="copyBtn">Copiar texto</button>
+    </div>
+    <textarea class="preview" id="preview" readonly spellcheck="false"></textarea>
+    <div class="save-msg" id="saveMsg"></div>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">06</span> Historial en GitHub</h2>
+    <p class="table-note">Guarda el saldo final de cada conciliación en tu repositorio de GitHub para que la próxima vez la herramienta compruebe sola que el saldo anterior calza con el saldo final del mes pasado, para Nortrans y para Tamaf por separado. Se guarda en un archivo <code>historial.json</code> dentro del mismo repositorio donde publicaste esta página.</p>
+    <details class="scotia-details" id="ghConfigDetails">
+      <summary>Configurar conexión con GitHub</summary>
+      <div class="period-grid" style="margin-top:10px; grid-template-columns:repeat(4,minmax(0,1fr));">
+        <div class="field"><label>Usuario / organización</label><input id="gh-owner" placeholder="contabilidadnortrans"></div>
+        <div class="field"><label>Repositorio</label><input id="gh-repo" placeholder="conciliador-softland"></div>
+        <div class="field"><label>Rama</label><input id="gh-branch" placeholder="main"></div>
+        <div class="field"><label>Token personal (PAT)</label><input id="gh-token" type="password" placeholder="github_pat_..."></div>
+      </div>
+      <p class="table-note">El token se guarda solo en este navegador — nunca pasa por Claude ni por ningún otro lado, solo viaja directo de tu navegador a GitHub. Necesita permiso de <b>Contents: Read and write</b> sobre este único repositorio — créalo como "Fine-grained token" en <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens/new</a>, eligiendo "Only select repositories" y marcando solo este repo.</p>
+      <button class="dl-btn" id="ghSaveCfgBtn" type="button">Guardar conexión</button>
+      <span class="save-msg" id="ghCfgMsg" style="display:inline-block; margin-left:10px;"></span>
+    </details>
+    <div class="checks" id="ghCheck" style="margin-top:14px;"></div>
+    <button class="dl-btn" id="ghSaveBtn" type="button" style="margin-top:12px;">Guardar esta conciliación en el historial</button>
+    <span class="save-msg" id="ghSaveMsg"></span>
+  </section>
+
+  <footer class="help">
+    <strong>Cómo se arma el CSV:</strong> fila 1 = período, año, saldo anterior, primer día del mes, último día del mes y saldo final. Desde la fila 2, una fila por movimiento en orden cronológico: correlativo, fecha, tipo (T1/CH), N° de documento o período, cargo y abono — separados por punto y coma, sin separador de miles, con salto de línea Windows (CRLF) y BOM UTF-8, igual que el archivo de julio (BCI) que ya subiste a Softland. El botón "Descargar TXT" genera exactamente el mismo contenido pero separado por tabulaciones en vez de punto y coma — equivalente al formato de Excel "Texto (delimitado por tabulaciones) (*.txt)".<br><br>
+    <strong>Si la cartola no trae saldo inicial declarado</strong> (pasa con Banco de Chile), se calcula solo: saldo del primer movimiento, sumando el cargo o restando el abono de esa fila, según corresponda — así queda el saldo justo antes de esa primera operación.
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  var MESES = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+  var BANK_LABEL = {BCI:'BCI', ESTADO:'BANCOESTADO', ITAU:'ITAU', SANTANDER:'SANTANDER', CHILE:'BANCOCHILE', SCOTIABANK:'SCOTIABANK'};
+
+  // ================= shared parsing helpers =================
+  function normalize(s){
+    return String(s==null?'':s).toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+  }
+  function pad2(n){ n=String(n); return n.length<2 ? '0'+n : n; }
+  function parseMonto(raw){ // Chilean convention: '.' thousands, ',' decimal
+    if(raw===null || raw===undefined) return '';
+    if(typeof raw==='number'){ if(isNaN(raw)) return ''; return String(Math.round(raw)); }
+    var s=String(raw).trim();
+    if(s==='') return '';
+    s=s.replace(/[^0-9.,-]/g,'');
+    s=s.replace(/\./g,'');
+    s=s.replace(',', '.');
+    var n=parseFloat(s);
+    if(isNaN(n)) return '';
+    return String(Math.round(n));
+  }
+  function parseMontoUS(raw){ // US convention: ',' thousands, '.' decimal (Scotiabank PDF export)
+    if(raw===null || raw===undefined) return '';
+    if(typeof raw==='number'){ if(isNaN(raw)) return ''; return String(Math.round(raw)); }
+    var s=String(raw).trim().replace(/[^0-9.,-]/g,'').replace(/,/g,'');
+    var n=parseFloat(s);
+    if(isNaN(n)) return '';
+    return String(Math.round(n));
+  }
+  function numOrBlank(v){
+    var n = (typeof v==='number') ? v : parseFloat(String(v||'').replace(/[^0-9.,-]/g,'').replace(/\./g,'').replace(',','.'));
+    if(!n || isNaN(n)) return '';
+    return String(Math.round(n));
+  }
+  function excelSerialToDate(n){
+    var epoch=new Date(Date.UTC(1899,11,30));
+    return new Date(epoch.getTime()+n*86400000);
+  }
+  // Parse a cell that should hold a dd/mm/yyyy date. NEVER trust a pre-parsed JS
+  // Date from SheetJS's CSV auto-sniff (it guesses MM/DD, wrong for Chile).
+  function cellToDateStr(v, yearFallback){
+    if(v===null||v===undefined) return '';
+    if(v instanceof Date){
+      return pad2(v.getDate())+'/'+pad2(v.getMonth()+1)+'/'+v.getFullYear();
+    }
+    if(typeof v==='number'){
+      var d=excelSerialToDate(v);
+      return pad2(d.getUTCDate())+'/'+pad2(d.getUTCMonth()+1)+'/'+d.getUTCFullYear();
+    }
+    var s=String(v).trim().replace(/-/g,'/');
+    var m=s.match(/^(\d{1,2})\/(\d{1,2})$/);
+    if(m && yearFallback){ return pad2(m[1])+'/'+pad2(m[2])+'/'+yearFallback; }
+    return s;
+  }
+  function dateKey(fecha){
+    var m=String(fecha||'').match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if(!m) return Infinity;
+    return parseInt(m[3],10)*10000 + parseInt(m[2],10)*100 + parseInt(m[1],10);
+  }
+  function fmtDMY(d,m,y){ return pad2(d)+'/'+pad2(m)+'/'+y; }
+  function parseAnyDMY(str){
+    var s=String(str||'');
+    var m=s.match(/(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
+    if(!m) return null;
+    return {d:parseInt(m[1],10), m:parseInt(m[2],10), y:parseInt(m[3],10)};
+  }
+  function findRowCol(aoa, matcher){
+    for(var r=0;r<aoa.length;r++){
+      var row=aoa[r]||[];
+      for(var c=0;c<row.length;c++){
+        if(matcher(normalize(row[c]))) return {r:r,c:c};
+      }
+    }
+    return null;
+  }
+  function rowHasAll(row, needles){
+    var norms=(row||[]).map(normalize);
+    return needles.every(function(nd){ return norms.some(function(cell){ return cell.indexOf(nd)>=0; }); });
+  }
+  function classifyTipoDoc(desc, docRaw, periodoNum){
+    var isCheque = normalize(desc).indexOf('CHEQUE')>=0;
+    if(isCheque) return {tipo:'CH', doc:String(docRaw==null?'':docRaw).replace(/\D/g,'')};
+    return {tipo:'T1', doc:String(periodoNum)};
+  }
+  function n(v){ var x=parseInt(v,10); return isNaN(x)?0:x; }
+
+  // ================= BCI =================
+  function sniffBCI(wb){
+    for(var i=0;i<wb.SheetNames.length;i++){
+      var aoa=wb.aoas[wb.SheetNames[i]];
+      var hit=findRowCol(aoa, function(nn){ return nn==='SALDO ANTERIOR'; });
+      if(hit && rowHasAll(aoa[hit.r], ['PERIODO'])) return {sheet:wb.SheetNames[i]};
+    }
+    return null;
+  }
+  function parseBCI(aoa){
+    var hit=findRowCol(aoa, function(nn){ return nn==='SALDO ANTERIOR'; });
+    var valRow=aoa[hit.r+1]||[];
+    var out={periodoEnd:null, saldoAnt:'', totalCargosDecl:'', totalAbonosDecl:'', saldoFin:'', rows:[]};
+    var periodoRangeStr='';
+    for(var c=0;c<aoa[hit.r].length;c++){
+      var lbl=normalize(aoa[hit.r][c]);
+      if(!lbl) continue;
+      var val=valRow[c];
+      if(lbl==='PERIODO') periodoRangeStr=val;
+      else if(lbl==='SALDO ANTERIOR') out.saldoAnt=parseMonto(val);
+      else if(lbl.indexOf('TOTAL CARGOS')===0) out.totalCargosDecl=parseMonto(val);
+      else if(lbl.indexOf('TOTAL ABONOS')===0) out.totalAbonosDecl=parseMonto(val);
+      else if(lbl.indexOf('SALDO CONTABLE FINAL')===0) out.saldoFin=parseMonto(val);
+    }
+    out.periodoEnd=parseAnyDMY(String(periodoRangeStr).split(/\s+al\s+/i)[1]||periodoRangeStr);
+    var movRow=-1, cols={};
+    for(var r=0;r<aoa.length;r++){
+      var hasFecha=false, hasDoc=false;
+      for(var c2=0;c2<(aoa[r]||[]).length;c2++){
+        var nn2=normalize(aoa[r][c2]);
+        if(nn2==='FECHA') hasFecha=true;
+        if(nn2.indexOf('DOCUMENTO')>=0) hasDoc=true;
+      }
+      if(hasFecha && hasDoc){ movRow=r; break; }
+    }
+    if(movRow<0) throw new Error('BCI: no encontré la tabla de movimientos.');
+    for(var c3=0;c3<aoa[movRow].length;c3++){
+      var n2=normalize(aoa[movRow][c3]);
+      if(n2==='FECHA') cols.fecha=c3;
+      else if(n2.indexOf('DESCRIP')>=0) cols.desc=c3;
+      else if(n2.indexOf('DOCUMENTO')>=0) cols.doc=c3;
+      else if(n2.indexOf('CARGO')>=0) cols.cargo=c3;
+      else if(n2.indexOf('ABONO')>=0) cols.abono=c3;
+    }
+    var periodoNum = out.periodoEnd ? out.periodoEnd.m : '';
+    for(var r2=movRow+1;r2<aoa.length;r2++){
+      var row=aoa[r2]||[];
+      var fechaV=row[cols.fecha], descV=row[cols.desc];
+      if((fechaV===''||fechaV==null) && (descV===''||descV==null)) break;
+      if(fechaV===''||fechaV==null) continue;
+      var td=classifyTipoDoc(descV, row[cols.doc], periodoNum);
+      out.rows.push({fecha:cellToDateStr(fechaV), tipo:td.tipo, doc:td.doc,
+        cargo:numOrBlank(row[cols.cargo]), abono:numOrBlank(row[cols.abono]),
+        desc:String(descV||'').trim(), saldoAfter:null});
+    }
+    return out;
+  }
+
+  // ================= BANCOESTADO =================
+  // Matches both the official per-week export (sheets "Resumen" + "Movimientos")
+  // and a plain workbook where Kevin pasted several weekly exports' movement
+  // tables together by hand into one sheet (no resumen at all, in that case).
+  function findEstadoMovementsHeader(wb){
+    for(var s=0;s<wb.SheetNames.length;s++){
+      var aoa=wb.aoas[wb.SheetNames[s]];
+      for(var r=0;r<aoa.length;r++){
+        var row=aoa[r]||[], cols={};
+        for(var c=0;c<row.length;c++){
+          var nn=normalize(row[c]);
+          if(nn==='FECHA') cols.fecha=c;
+          else if(nn.indexOf('OPERACION')>=0) cols.doc=c;
+          else if(nn.indexOf('DESCRIP')>=0) cols.desc=c;
+          else if(nn.indexOf('CARGO')>=0) cols.cargo=c;
+          else if(nn.indexOf('ABONO')>=0) cols.abono=c;
+          else if(nn==='SALDO') cols.saldo=c;
+        }
+        if(cols.fecha!=null && cols.doc!=null && cols.desc!=null && cols.cargo!=null && cols.abono!=null && cols.saldo!=null){
+          return {sheet:wb.SheetNames[s], headerRow:r, cols:cols};
+        }
+      }
+    }
+    return null;
+  }
+  function sniffEstado(wb){
+    return findEstadoMovementsHeader(wb) ? {} : null;
+  }
+  function parseEstado(wb){
+    var hdr = findEstadoMovementsHeader(wb);
+    var mov = wb.aoas[hdr.sheet], cols = hdr.cols;
+    function lastNonEmpty(row){ for(var i=row.length-1;i>=0;i--){ if(row[i]!==''&&row[i]!=null) return row[i]; } return ''; }
+    // Resumen is optional: prefer a sheet literally named "Resumen"; a
+    // hand-merged workbook has none, so it stays blank and the shared
+    // pipeline fills in saldo/periodo from the movement rows themselves.
+    var resumenSheets = wb.SheetNames.filter(function(nm){ return normalize(nm)==='RESUMEN'; });
+    var scanSheets = resumenSheets.length ? resumenSheets : wb.SheetNames;
+    var saldoInicial='', totalCargos='', totalCheques='', totalAbonos='', totalDepositos='', saldoFinal='', fechaFinal='';
+    scanSheets.forEach(function(nm){
+      var res=wb.aoas[nm];
+      for(var r=0;r<res.length;r++){
+        var row=res[r]||[]; var lbl=normalize(row[0]);
+        if(!lbl) continue;
+        var val=lastNonEmpty(row);
+        if(lbl==='SALDO INICIAL' && saldoInicial==='') saldoInicial=parseMonto(val);
+        else if(lbl==='TOTAL CARGOS' && totalCargos==='') totalCargos=parseMonto(val);
+        else if(lbl==='TOTAL CHEQUES' && totalCheques==='') totalCheques=parseMonto(val);
+        else if(lbl==='TOTAL ABONOS' && totalAbonos==='') totalAbonos=parseMonto(val);
+        else if(lbl==='TOTAL DEPOSITOS' && totalDepositos==='') totalDepositos=parseMonto(val);
+        else if(lbl==='SALDO FINAL' && saldoFinal==='') saldoFinal=parseMonto(val);
+        else if(lbl==='FECHA FINAL' && fechaFinal==='') fechaFinal=val;
+      }
+    });
+    var out={
+      periodoEnd: fechaFinal ? parseAnyDMY(fechaFinal) : null, saldoAnt: saldoInicial,
+      totalCargosDecl: (totalCargos===''&&totalCheques==='') ? '' : String(n(totalCargos)+n(totalCheques)),
+      totalAbonosDecl: (totalAbonos===''&&totalDepositos==='') ? '' : String(n(totalAbonos)+n(totalDepositos)),
+      saldoFin: saldoFinal, rows: []
+    };
+    var periodoNum = out.periodoEnd ? out.periodoEnd.m : '';
+    for(var r2=hdr.headerRow+1;r2<mov.length;r2++){
+      var row2=mov[r2]||[]; var fechaV=row2[cols.fecha];
+      if(fechaV===''||fechaV==null) continue;
+      var td=classifyTipoDoc(row2[cols.desc], row2[cols.doc], periodoNum);
+      out.rows.push({fecha:cellToDateStr(fechaV), tipo:td.tipo, doc:td.doc,
+        cargo:numOrBlank(row2[cols.cargo]), abono:numOrBlank(row2[cols.abono]),
+        desc:String(row2[cols.desc]||'').trim(),
+        saldoAfter:(typeof row2[cols.saldo]==='number') ? row2[cols.saldo] : null});
+    }
+    return out;
+  }
+
+  // ================= ITAU =================
+  function sniffItau(wb){
+    for(var i=0;i<wb.SheetNames.length;i++){
+      var aoa=wb.aoas[wb.SheetNames[i]];
+      var hit=findRowCol(aoa, function(nn){ return nn.indexOf('ITAU')>=0; });
+      if(hit) return {sheet:wb.SheetNames[i]};
+    }
+    return null;
+  }
+  function parseItau(aoa){
+    var out={periodoEnd:null, saldoAnt:'', totalCargosDecl:'', totalAbonosDecl:'', saldoFin:'', rows:[]};
+    var periodoHit=findRowCol(aoa, function(nn){ return /\d{1,2}\/\d{1,2}\/\d{4}\s*-\s*\d{1,2}\/\d{1,2}\/\d{4}/.test(nn); });
+    if(periodoHit){
+      var raw=aoa[periodoHit.r][periodoHit.c];
+      var m=String(raw).match(/(\d{1,2}\/\d{1,2}\/\d{4})\s*-\s*(\d{1,2}\/\d{1,2}\/\d{4})/);
+      if(m) out.periodoEnd=parseAnyDMY(m[2]);
+    }
+    var saldoHit=findRowCol(aoa, function(nn){ return nn.indexOf('SALDO ANTERIOR CUENTA CORRIENTE')>=0; });
+    if(saldoHit){ var vrow=aoa[saldoHit.r+1]||[]; out.saldoAnt=parseMonto(vrow[saldoHit.c]); }
+    var totHit=findRowCol(aoa, function(nn){ return nn.indexOf('TOTAL CARGOS')>=0; });
+    if(totHit){
+      var hrow=aoa[totHit.r], vrow2=aoa[totHit.r+1]||[];
+      for(var c=0;c<hrow.length;c++){
+        var lbl=normalize(hrow[c]);
+        if(lbl.indexOf('TOTAL CARGOS')>=0) out.totalCargosDecl=parseMonto(vrow2[c]);
+        else if(lbl.indexOf('TOTAL ABONO')>=0) out.totalAbonosDecl=parseMonto(vrow2[c]);
+      }
+    }
+    if(out.saldoAnt!=='' && out.totalCargosDecl!=='' && out.totalAbonosDecl!==''){
+      out.saldoFin=String(n(out.saldoAnt)-n(out.totalCargosDecl)+n(out.totalAbonosDecl));
+    }
+    var hdrHit=findRowCol(aoa, function(nn){ return nn==='FECHA'; });
+    if(!hdrHit) throw new Error('Itaú: no encontré la tabla de movimientos.');
+    var hdrRow=aoa[hdrHit.r], hdrRow2=aoa[hdrHit.r+1]||[], cols={};
+    for(var c2=0;c2<hdrRow.length;c2++){
+      var top=normalize(hdrRow[c2]), bot=normalize(hdrRow2[c2]), combo=(top+' '+bot).trim();
+      if(top==='FECHA') cols.fecha=c2;
+      else if(top.indexOf('NUMERO DE')>=0) cols.doc=c2;
+      else if(top.indexOf('DESCRIP')>=0) cols.desc=c2;
+      else if(combo.indexOf('ABONO')>=0) cols.abono=c2;
+      else if(combo.indexOf('CARGO')>=0) cols.cargo=c2;
+    }
+    var yearFallback = out.periodoEnd ? out.periodoEnd.y : new Date().getFullYear();
+    var periodoNum = out.periodoEnd ? out.periodoEnd.m : '';
+    for(var r=hdrHit.r+2;r<aoa.length;r++){
+      var row=aoa[r]||[]; var first=normalize(row[0]);
+      if(first.indexOf('RESUMEN DE SALDOS')>=0) break;
+      var fechaV=row[cols.fecha];
+      if(fechaV===''||fechaV==null) continue;
+      if(!/^\d{1,2}\/\d{1,2}/.test(String(fechaV))) continue;
+      var td=classifyTipoDoc(row[cols.desc], row[cols.doc], periodoNum);
+      out.rows.push({fecha:cellToDateStr(fechaV, yearFallback), tipo:td.tipo, doc:td.doc,
+        cargo:numOrBlank(row[cols.cargo]), abono:numOrBlank(row[cols.abono]),
+        desc:String(row[cols.desc]||'').trim(), saldoAfter:null});
+    }
+    return out;
+  }
+
+  // ================= SANTANDER =================
+  function sniffSantander(wb){
+    for(var i=0;i<wb.SheetNames.length;i++){
+      var aoa=wb.aoas[wb.SheetNames[i]];
+      var hit=findRowCol(aoa, function(nn){ return nn==='SALDO INICIAL'; });
+      if(hit && rowHasAll(aoa[hit.r], ['CHEQUES','OTROS CARGOS','SALDO FINAL'])) return {sheet:wb.SheetNames[i]};
+    }
+    return null;
+  }
+  function parseSantander(aoa){
+    var out={periodoEnd:null, saldoAnt:'', totalCargosDecl:'', totalAbonosDecl:'', saldoFin:'', rows:[]};
+    var hit=findRowCol(aoa, function(nn){ return nn==='SALDO INICIAL'; });
+    var hdr=aoa[hit.r], val=aoa[hit.r+1]||[];
+    var deposit=0, otrosAb=0, cheques=0, otrosCa=0;
+    for(var c=0;c<hdr.length;c++){
+      var lbl=normalize(hdr[c]);
+      if(lbl==='SALDO INICIAL') out.saldoAnt=parseMonto(val[c]);
+      else if(lbl==='DEPOSITOS') deposit=n(parseMonto(val[c]));
+      else if(lbl==='OTROS ABONOS') otrosAb=n(parseMonto(val[c]));
+      else if(lbl==='CHEQUES') cheques=Math.abs(n(parseMonto(val[c])));
+      else if(lbl==='OTROS CARGOS') otrosCa=Math.abs(n(parseMonto(val[c])));
+      else if(lbl==='SALDO FINAL') out.saldoFin=parseMonto(val[c]);
+    }
+    out.totalAbonosDecl=String(deposit+otrosAb);
+    out.totalCargosDecl=String(cheques+otrosCa);
+    var periodoHit=findRowCol(aoa, function(nn){ return nn.indexOf('FECHA HASTA')>=0; });
+    if(periodoHit){
+      var m=String(aoa[periodoHit.r][periodoHit.c]).match(/(\d{1,2}\/\d{1,2}\/\d{4})/);
+      if(m) out.periodoEnd=parseAnyDMY(m[1]);
+    }
+    var mHit=findRowCol(aoa, function(nn){ return nn==='MONTO'; });
+    if(!mHit) throw new Error('Santander: no encontré la tabla de movimientos.');
+    var mHdr=aoa[mHit.r], cols={};
+    for(var c2=0;c2<mHdr.length;c2++){
+      var lbl2=normalize(mHdr[c2]);
+      if(lbl2==='MONTO') cols.monto=c2;
+      else if(lbl2.indexOf('DESCRIP')>=0) cols.desc=c2;
+      else if(lbl2==='FECHA') cols.fecha=c2;
+      else if(lbl2.indexOf('DOCUMENTO')>=0) cols.doc=c2;
+    }
+    var periodoNum = out.periodoEnd ? out.periodoEnd.m : '';
+    for(var r=mHit.r+1;r<aoa.length;r++){
+      var row=aoa[r]||[]; var first=normalize(row[0]);
+      if(first.indexOf('RESUMEN COMISIONES')>=0 || first.indexOf('SALDOS DIARIOS')>=0) break;
+      var fechaV=row[cols.fecha];
+      if(fechaV===''||fechaV==null) continue;
+      if(!/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(String(fechaV))) continue;
+      var monto = (typeof row[cols.monto]==='number') ? row[cols.monto] : parseFloat(parseMonto(row[cols.monto])||'0');
+      var td=classifyTipoDoc(row[cols.desc], row[cols.doc], periodoNum);
+      out.rows.push({fecha:cellToDateStr(fechaV), tipo:td.tipo, doc:td.doc,
+        cargo: monto<0 ? String(Math.round(-monto)) : '', abono: monto>0 ? String(Math.round(monto)) : '',
+        desc:String(row[cols.desc]||'').trim(), saldoAfter:null});
+    }
+    return out;
+  }
+
+  // ================= SCOTIABANK (Excel exportado desde el PDF, ej. con iLovePDF) =================
+  function findScotiaXLSHeader(wb){
+    for(var s=0;s<wb.SheetNames.length;s++){
+      var aoa=wb.aoas[wb.SheetNames[s]];
+      for(var r=0;r<aoa.length;r++){
+        var row=aoa[r]||[], cols={};
+        for(var c=0;c<row.length;c++){
+          var nn=normalize(row[c]);
+          if(nn==='FECHA') cols.fecha=c;
+          else if(nn.indexOf('DESCRIP')>=0) cols.desc=c;
+          else if(nn.indexOf('DOCUMENTO')>=0) cols.doc=c;
+          else if(nn.indexOf('CARGO')>=0) cols.cargo=c;
+          else if(nn.indexOf('ABONO')>=0) cols.abono=c;
+          else if(nn==='SALDO') cols.saldo=c;
+        }
+        if(cols.fecha!=null && cols.desc!=null && cols.cargo!=null && cols.abono!=null && cols.saldo!=null){
+          return {sheet:wb.SheetNames[s], headerRow:r, cols:cols};
+        }
+      }
+    }
+    return null;
+  }
+  function sniffScotiaXLS(wb){
+    var hdr=findScotiaXLSHeader(wb);
+    if(!hdr) return null;
+    // Distingue de BancoEstado (usa "N° Operación", no columna con "DOCUMENTO") exigiendo que el
+    // bloque previo al encabezado tenga las etiquetas propias del estado de cuenta de Scotiabank.
+    var aoa=wb.aoas[hdr.sheet];
+    var pre=normalize(aoa.slice(0,hdr.headerRow).map(function(row){ return row.join(' '); }).join(' '));
+    if(pre.indexOf('SALDO ANTERIOR')<0 || pre.indexOf('CARGO')<0) return null;
+    return hdr;
+  }
+  function parseScotiaXLS(wb){
+    var hdr=findScotiaXLSHeader(wb);
+    var aoa=wb.aoas[hdr.sheet], cols=hdr.cols;
+    function nextVal(row, fromIdx){
+      for(var i=fromIdx+1;i<row.length;i++){ if(row[i]!==''&&row[i]!=null) return row[i]; }
+      return '';
+    }
+    var saldoAnt='', saldoFin='', totalCargos='', totalAbonos='', fechaHasta='';
+    for(var r=0;r<hdr.headerRow;r++){
+      var row=aoa[r]||[];
+      for(var c=0;c<row.length;c++){
+        var lbl=normalize(row[c]);
+        if(!lbl) continue;
+        if(lbl==='SALDO ANTERIOR' && saldoAnt==='') saldoAnt=parseMonto(nextVal(row,c));
+        else if(lbl==='SALDO ACTUAL' && saldoFin==='') saldoFin=parseMonto(nextVal(row,c));
+        else if(lbl.indexOf('CARGO')>=0 && lbl.indexOf('GIRO')>=0 && totalCargos==='') totalCargos=parseMonto(nextVal(row,c));
+        else if(lbl.indexOf('DEPOSITO')>=0 && lbl.indexOf('ABONO')>=0 && totalAbonos==='') totalAbonos=parseMonto(nextVal(row,c));
+        else if(lbl==='HASTA' && fechaHasta==='') fechaHasta=nextVal(row,c);
+      }
+    }
+    var out={
+      periodoEnd: fechaHasta!=='' ? parseAnyDMY(cellToDateStr(fechaHasta)) : null,
+      saldoAnt:saldoAnt, totalCargosDecl:totalCargos, totalAbonosDecl:totalAbonos, saldoFin:saldoFin, rows:[]
+    };
+    var periodoNum = out.periodoEnd ? out.periodoEnd.m : '';
+    for(var r2=hdr.headerRow+1;r2<aoa.length;r2++){
+      var row2=aoa[r2]||[]; var fechaV=row2[cols.fecha];
+      if(fechaV===''||fechaV==null) continue;
+      var fechaStr=cellToDateStr(fechaV);
+      if(!/^\d{2}\/\d{2}\/\d{4}$/.test(fechaStr)) continue; // filas de cierre, ej. "Total Registros : 7"
+      var td=classifyTipoDoc(row2[cols.desc], cols.doc!=null ? row2[cols.doc] : '', periodoNum);
+      out.rows.push({fecha:fechaStr, tipo:td.tipo, doc:td.doc,
+        cargo:numOrBlank(row2[cols.cargo]), abono:numOrBlank(row2[cols.abono]),
+        desc:String(row2[cols.desc]||'').trim(),
+        saldoAfter:(typeof row2[cols.saldo]==='number') ? row2[cols.saldo] : parseFloat(parseMonto(row2[cols.saldo])||'NaN')});
+    }
+    return out;
+  }
+
+  // ================= SCOTIABANK v2 (Excel "Estado de Cuentas / Lista de Clientes") =================
+  // Variante distinta del "Detalle Cartolas Emitidas": columnas F/Proceso, Referencia,
+  // Código Transac., Descripción, Débito, Crédito, Saldo. Los totales declarados vienen
+  // como texto embebido ("Total Débitos : (2) : 21,162,019.00"), con números en formato
+  // US (coma miles, punto decimal) — igual que el PDF de Scotiabank pegado como texto.
+  function findScotiaXLS2Header(wb){
+    for(var s=0;s<wb.SheetNames.length;s++){
+      var aoa=wb.aoas[wb.SheetNames[s]];
+      for(var r=0;r<aoa.length;r++){
+        var row=aoa[r]||[], cols={};
+        for(var c=0;c<row.length;c++){
+          var nn=normalize(row[c]);
+          if(nn.indexOf('PROCESO')>=0) cols.fecha=c;
+          else if(nn.indexOf('DESCRIP')>=0) cols.desc=c;
+          else if(nn==='DEBITO') cols.cargo=c;
+          else if(nn==='CREDITO') cols.abono=c;
+          else if(nn==='SALDO') cols.saldo=c;
+        }
+        if(cols.fecha!=null && cols.desc!=null && cols.cargo!=null && cols.abono!=null && cols.saldo!=null){
+          return {sheet:wb.SheetNames[s], headerRow:r, cols:cols};
+        }
+      }
+    }
+    return null;
+  }
+  function sniffScotiaXLS2(wb){
+    var hdr=findScotiaXLS2Header(wb);
+    if(!hdr) return null;
+    var aoa=wb.aoas[hdr.sheet];
+    var pre=normalize(aoa.slice(0,hdr.headerRow).map(function(row){ return row.join(' '); }).join(' '));
+    if(pre.indexOf('CUENTA')<0) return null;
+    return hdr;
+  }
+  function parseScotiaXLS2(wb){
+    var hdr=findScotiaXLS2Header(wb);
+    var aoa=wb.aoas[hdr.sheet], cols=hdr.cols;
+    function nextVal(row, fromIdx){
+      for(var i=fromIdx+1;i<row.length;i++){ if(row[i]!==''&&row[i]!=null) return row[i]; }
+      return '';
+    }
+    var saldoAnt='';
+    for(var r=0;r<hdr.headerRow;r++){
+      var row=aoa[r]||[];
+      for(var c=0;c<row.length;c++){
+        var cell=row[c];
+        if(saldoAnt==='' && typeof cell==='string' && /SALDO\s+AL\s+\d{1,2}\/\d{1,2}\/\d{2,4}/i.test(cell)){
+          saldoAnt=parseMonto(nextVal(row,c));
+        }
+      }
+    }
+    // Totales declarados (opcionales): texto embebido en cualquier celda, en cualquier parte de
+    // la hoja. Si el formato del texto cambia y no calzan, quedan en blanco y el resumen se
+    // calcula solo a partir de los propios movimientos (fallback general en finalizeParsed).
+    var totalCargos='', totalAbonos='', saldoFin='';
+    for(var r2=0;r2<aoa.length;r2++){
+      var row2=aoa[r2]||[];
+      for(var c2=0;c2<row2.length;c2++){
+        var cell2=row2[c2];
+        if(typeof cell2!=='string') continue;
+        var mC,mA,mS;
+        if(totalCargos==='' && (mC=cell2.match(/D[ée]bitos?\s*:?\s*(?:\(\d+\)\s*:?\s*)?([\d,]+\.\d{2})/i))) totalCargos=parseMontoUS(mC[1]);
+        if(totalAbonos==='' && (mA=cell2.match(/Cr[ée]ditos?\s*:?\s*(?:\(\d+\)\s*:?\s*)?([\d,]+\.\d{2})/i))) totalAbonos=parseMontoUS(mA[1]);
+        if(saldoFin==='' && (mS=cell2.match(/Saldo\s+Final\s*:?\s*([\d,]+\.\d{2})/i))) saldoFin=parseMontoUS(mS[1]);
+      }
+    }
+    var out={periodoEnd:null, saldoAnt:saldoAnt, totalCargosDecl:totalCargos, totalAbonosDecl:totalAbonos, saldoFin:saldoFin, rows:[]};
+    var rawRows=[], maxKey=-1, maxDate=null;
+    for(var r3=hdr.headerRow+1;r3<aoa.length;r3++){
+      var row3=aoa[r3]||[]; var fechaV=row3[cols.fecha];
+      if(fechaV===''||fechaV==null) continue;
+      var fechaStr=cellToDateStr(fechaV);
+      if(!/^\d{2}\/\d{2}\/\d{4}$/.test(fechaStr)) continue; // filas de cierre ("Total Débitos : ...")
+      rawRows.push({row:row3, fechaStr:fechaStr});
+      var k=dateKey(fechaStr);
+      if(k>maxKey){ maxKey=k; maxDate=parseAnyDMY(fechaStr); }
+    }
+    if(!rawRows.length) throw new Error('Scotiabank: no encontré movimientos.');
+    out.periodoEnd=maxDate;
+    var periodoNum = out.periodoEnd ? out.periodoEnd.m : '';
+    rawRows.forEach(function(item){
+      var row=item.row;
+      var td=classifyTipoDoc(row[cols.desc], '', periodoNum);
+      out.rows.push({fecha:item.fechaStr, tipo:td.tipo, doc:td.doc,
+        cargo:numOrBlank(row[cols.cargo]), abono:numOrBlank(row[cols.abono]),
+        desc:String(row[cols.desc]||'').trim(),
+        saldoAfter:(typeof row[cols.saldo]==='number') ? row[cols.saldo] : parseFloat(parseMonto(row[cols.saldo])||'NaN')});
+    });
+    return out;
+  }
+
+  // ================= BANCO DE CHILE (CartolaEmitida) =================
+  function sniffChile(wb){
+    for(var i=0;i<wb.SheetNames.length;i++){
+      var aoa=wb.aoas[wb.SheetNames[i]];
+      var hit=findRowCol(aoa, function(nn){ return nn==='FECHA'; });
+      if(hit && rowHasAll(aoa[hit.r], ['DETALLE MOVIMIENTO','DOCTO'])) return {sheet:wb.SheetNames[i]};
+    }
+    return null;
+  }
+  function parseChile(aoa){
+    var out={periodoEnd:null, saldoAnt:'', totalCargosDecl:'', totalAbonosDecl:'', saldoFin:'', rows:[]};
+    var hit=findRowCol(aoa, function(nn){ return nn==='FECHA'; });
+    var hdr=aoa[hit.r], cols={};
+    for(var c=0;c<hdr.length;c++){
+      var nn2=normalize(hdr[c]);
+      if(nn2==='FECHA') cols.fecha=c;
+      else if(nn2==='DETALLE MOVIMIENTO') cols.desc=c;
+      else if(nn2.indexOf('CHEQUE O CARGO')>=0) cols.cargo=c;
+      else if(nn2.indexOf('DEPOSITO O ABONO')>=0) cols.abono=c;
+      else if(nn2==='SALDO') cols.saldo=c;
+      else if(nn2.indexOf('DOCTO')>=0) cols.doc=c;
+    }
+    var rawRows=[];
+    for(var r=hit.r+1;r<aoa.length;r++){
+      var row=aoa[r]||[]; var fechaV=row[cols.fecha];
+      if(fechaV===''||fechaV==null) continue;
+      rawRows.push(row);
+    }
+    if(!rawRows.length) throw new Error('Banco de Chile: no encontré movimientos.');
+    var maxKey=-1, maxDate=null;
+    rawRows.forEach(function(row){
+      var fs=cellToDateStr(row[cols.fecha]); var k=dateKey(fs);
+      if(k>maxKey){ maxKey=k; maxDate=parseAnyDMY(fs); }
+    });
+    out.periodoEnd=maxDate;
+    var periodoNum = out.periodoEnd ? out.periodoEnd.m : '';
+    rawRows.forEach(function(row){
+      var td=classifyTipoDoc(row[cols.desc], row[cols.doc], periodoNum);
+      out.rows.push({fecha:cellToDateStr(row[cols.fecha]), tipo:td.tipo, doc:td.doc,
+        cargo:numOrBlank(row[cols.cargo]), abono:numOrBlank(row[cols.abono]),
+        desc:String(row[cols.desc]||'').trim(),
+        saldoAfter:(typeof row[cols.saldo]==='number') ? row[cols.saldo] : parseFloat(parseMonto(row[cols.saldo])||'NaN')});
+    });
+    return out;
+  }
+
+  // ================= SCOTIABANK (texto pegado del PDF) =================
+  function sniffScotiabankText(text){
+    var nn=normalize(text);
+    return (nn.indexOf('ESTADO DE CUENTA')>=0 && nn.indexOf('SALDO ANTERIOR')>=0 && nn.indexOf('CARGO')>=0);
+  }
+  function parseScotiabankText(text){
+    var lines=String(text).split('\n').map(function(l){return l.trim();}).filter(Boolean);
+    var out={periodoEnd:null, saldoAnt:'', totalCargosDecl:'', totalAbonosDecl:'', saldoFin:'', rows:[]};
+    var m;
+    lines.forEach(function(line){
+      if((m=line.match(/Saldo Anterior\s*[+-]?\s*([\d.,]+)/i))) out.saldoAnt=parseMontoUS(m[1]);
+      if((m=line.match(/Dep[oó]sitos?\s*\/\s*Abonos\s*([\d.,]+)/i))) out.totalAbonosDecl=parseMontoUS(m[1]);
+      if((m=line.match(/Cargo\s*\/\s*Giros\s*([\d.,]+)/i))) out.totalCargosDecl=parseMontoUS(m[1]);
+      if((m=line.match(/Saldo Actual\s*[+-]?\s*([\d.,]+)/i))) out.saldoFin=parseMontoUS(m[1]);
+      if((m=line.match(/Desde\s*\d{1,2}\/\d{1,2}\/\d{4}\s*Hasta\s*(\d{1,2}\/\d{1,2}\/\d{4})/i))) out.periodoEnd=parseAnyDMY(m[1]);
+    });
+    if(!lines.some(function(l){return /Saldo Anterior/i.test(l);})) throw new Error('No reconozco este texto como cartola de Scotiabank.');
+    var rowRe=/^(\d{2}\/\d{2}\/\d{4})\s+(.*\S)\s+([\d,]+\.\d{2})\s+([\d,]+\.\d{2})\s*$/;
+    var running = parseFloat(out.saldoAnt || '0');
+    var periodoNum = out.periodoEnd ? out.periodoEnd.m : '';
+    lines.forEach(function(line){
+      var mm=line.match(rowRe);
+      if(!mm) return;
+      var fecha=mm[1], desc=mm[2];
+      var amt=parseFloat(parseMontoUS(mm[3]));
+      var saldoAfter=parseFloat(parseMontoUS(mm[4]));
+      var delta=saldoAfter-running;
+      var cargo='', abono='';
+      if(Math.abs(delta-amt)<1) abono=String(Math.round(amt));
+      else if(Math.abs(delta+amt)<1) cargo=String(Math.round(amt));
+      else { abono = delta>=0 ? String(Math.round(amt)) : ''; cargo = delta<0 ? String(Math.round(amt)) : ''; }
+      running=saldoAfter;
+      var td=classifyTipoDoc(desc, '', periodoNum);
+      out.rows.push({fecha:fecha, tipo:td.tipo, doc:td.doc, cargo:cargo, abono:abono, desc:desc, saldoAfter:saldoAfter});
+    });
+    if(!out.rows.length) throw new Error('No encontré movimientos en el texto pegado.');
+    return out;
+  }
+
+  // ================= dispatch + unified pipeline =================
+  function detectAndParse(wb){
+    var hit;
+    if((hit=sniffEstado(wb))) return {banco:'ESTADO', data:parseEstado(wb)};
+    if((hit=sniffItau(wb))) return {banco:'ITAU', data:parseItau(wb.aoas[hit.sheet])};
+    if((hit=sniffBCI(wb))) return {banco:'BCI', data:parseBCI(wb.aoas[hit.sheet])};
+    if((hit=sniffSantander(wb))) return {banco:'SANTANDER', data:parseSantander(wb.aoas[hit.sheet])};
+    if((hit=sniffScotiaXLS(wb))) return {banco:'SCOTIABANK', data:parseScotiaXLS(wb)};
+    if((hit=sniffScotiaXLS2(wb))) return {banco:'SCOTIABANK', data:parseScotiaXLS2(wb)};
+    if((hit=sniffChile(wb))) return {banco:'CHILE', data:parseChile(wb.aoas[hit.sheet])};
+    throw new Error('No reconozco el formato de esta cartola. Bancos soportados: BCI, Banco de Chile, BancoEstado, Santander e Itaú (Scotiabank: sube el Excel exportado desde el PDF, o pega el texto del PDF).');
+  }
+  function finalizeParsed(parsed){
+    var rows = parsed.rows.slice().sort(function(a,b){ return dateKey(a.fecha)-dateKey(b.fecha); });
+    if(parsed.saldoAnt===''){
+      var first = rows[0];
+      if(first && first.saldoAfter!=null && !isNaN(first.saldoAfter)){
+        parsed.saldoAnt = String(Math.round(first.saldoAfter + n(first.cargo) - n(first.abono)));
+      }
+    }
+    var sumCargo=0, sumAbono=0;
+    rows.forEach(function(r){ sumCargo+=n(r.cargo); sumAbono+=n(r.abono); });
+    if(parsed.saldoFin===''){
+      var last = rows[rows.length-1];
+      if(parsed.saldoAnt!==''){ parsed.saldoFin = String(n(parsed.saldoAnt) - sumCargo + sumAbono); }
+      else if(last && last.saldoAfter!=null && !isNaN(last.saldoAfter)){ parsed.saldoFin = String(Math.round(last.saldoAfter)); }
+    }
+    var end = parsed.periodoEnd;
+    if(!end && rows.length){ end = parseAnyDMY(rows[rows.length-1].fecha); }
+    var periodo = end ? String(end.m) : '';
+    var anio = end ? String(end.y) : '';
+    var primerDia = end ? fmtDMY(1, end.m, end.y) : '';
+    var ultimoDia = end ? fmtDMY(end.d, end.m, end.y) : '';
+    return {
+      periodo:periodo, anio:anio, saldoAnt:parsed.saldoAnt, primerDia:primerDia, ultimoDia:ultimoDia, saldoFin:parsed.saldoFin,
+      totalCargosDecl:parsed.totalCargosDecl, totalAbonosDecl:parsed.totalAbonosDecl,
+      // Softland exige que "Nº Documento" sea siempre numérico. Para movimientos T1 va el número de
+      // período (columna A de la fila 1) — si el parser del banco no pudo determinar la fecha final
+      // (p.ej. la cartola de BancoEstado armada a mano, sin hoja Resumen ni "Fecha Final" declarada),
+      // r.doc queda vacío; se completa acá con el período ya resuelto para no subir un campo en blanco.
+      rows: rows.map(function(r){ return {fecha:r.fecha, tipo:r.tipo, doc:(r.tipo==='T1' && !r.doc) ? periodo : r.doc, cargo:r.cargo, abono:r.abono, desc:r.desc}; })
+    };
+  }
+
+  // Combina uno o varios archivos ya parseados (mismo banco) en un solo período. Las cartolas de
+  // BancoEstado vienen por semana y algunas cruzan de un mes a otro — acá se mira SOLO la fecha de
+  // cada movimiento (nunca el rango que declara el archivo) para decidir qué mes conservar, y se
+  // recalcula el saldo anterior/final para que cuadren con ese mes exacto en vez de con la semana
+  // completa. Devuelve {result, note} — result tiene la misma forma que finalizeParsed(); note es
+  // un texto para mostrarle a Kevin qué se incluyó/excluyó (o null si no hizo falta explicar nada).
+  function mergeAndFinalize(dataList){
+    // Orden de los archivos entre sí (por si Kevin los selecciona fuera de orden): por su fecha
+    // más antigua declarada en los propios movimientos.
+    var fileOrder = dataList.map(function(d, fi){
+      var minKey=Infinity;
+      d.data.rows.forEach(function(r){ var k=dateKey(r.fecha); if(k<minKey) minKey=k; });
+      return {fi:fi, minKey:minKey};
+    }).sort(function(a,b){ return a.minKey-b.minKey; });
+    var fileRank={};
+    fileOrder.forEach(function(item, rank){ fileRank[item.fi]=rank; });
+
+    var merged=[];
+    dataList.forEach(function(d, fi){
+      // Cada cartola bancaria lista sus movimientos siempre en el mismo sentido (todas las que
+      // soportamos vienen del más nuevo al más antiguo) — se detecta comparando la fecha de la
+      // primera fila contra la última, para no asumirlo a ciegas, y así poder ordenar
+      // correctamente los movimientos de un mismo día dentro de ese archivo.
+      var rows=d.data.rows;
+      var descending = rows.length>1 && dateKey(rows[0].fecha) >= dateKey(rows[rows.length-1].fecha);
+      rows.forEach(function(r, idx){
+        var seq = descending ? (rows.length-1-idx) : idx; // 0 = movimiento más antiguo del archivo
+        merged.push({fecha:r.fecha, tipo:r.tipo, doc:r.doc, cargo:r.cargo, abono:r.abono, desc:r.desc, saldoAfter:r.saldoAfter, _src:fi, _rank:fileRank[fi], _seq:seq});
+      });
+    });
+    // filtro defensivo de duplicados exactos (ej. si Kevin sube sin querer el mismo archivo dos veces)
+    var seen={};
+    merged = merged.filter(function(r){
+      var key=[r.fecha, normalize(r.desc), r.cargo, r.abono, r.saldoAfter].join('|');
+      if(seen[key]) return false;
+      seen[key]=true;
+      return true;
+    });
+    // Orden cronológico: por fecha, y dentro del mismo día por archivo (el más antiguo primero) y
+    // luego por la secuencia real dentro de ese archivo — así dos movimientos del mismo día quedan
+    // en su orden verdadero en vez de en el orden en que aparecían en la planilla.
+    merged.sort(function(a,b){
+      var dk=dateKey(a.fecha)-dateKey(b.fecha); if(dk!==0) return dk;
+      if(a._rank!==b._rank) return a._rank-b._rank;
+      return a._seq-b._seq;
+    });
+    if(!merged.length) throw new Error('No encontré movimientos en el/los archivo(s).');
+
+    var groups={};
+    merged.forEach(function(r){
+      var d=parseAnyDMY(r.fecha); if(!d) return;
+      var k=d.y*100+d.m;
+      groups[k]=groups[k]||{y:d.y, m:d.m, days:{}};
+      groups[k].days[r.fecha]=true;
+    });
+    var keys=Object.keys(groups);
+    var target=null;
+    keys.forEach(function(k){
+      var g=groups[k]; var nDays=Object.keys(g.days).length; var kk=parseInt(k,10);
+      if(!target || nDays>target.nDays || (nDays===target.nDays && kk>target.key)){
+        target={y:g.y, m:g.m, key:kk, nDays:nDays};
+      }
+    });
+    var multiMonth = keys.length>1;
+
+    var included=[], excludedBefore=[], excludedAfter=[];
+    merged.forEach(function(r){
+      var d=parseAnyDMY(r.fecha); var k = d ? d.y*100+d.m : null;
+      if(k===target.key) included.push(r);
+      else if(k!=null && k<target.key) excludedBefore.push(r);
+      else excludedAfter.push(r);
+    });
+    var trimmed = excludedBefore.length>0 || excludedAfter.length>0;
+
+    if(!trimmed && dataList.length===1){
+      // un solo archivo, todo dentro de un mes: exactamente el mismo camino de siempre.
+      return {result: finalizeParsed(dataList[0].data), note: null};
+    }
+
+    var saldoAnt='', saldoFin='', totalCargosDecl='', totalAbonosDecl='';
+    if(!trimmed){
+      // varios archivos, todos dentro del mismo mes: nada se descartó, así que se puede seguir
+      // confiando en lo que declara cada cartola — saldo anterior del archivo más antiguo, saldo
+      // final del más nuevo, y totales sumados solo si TODOS los archivos los traen.
+      var firstSrc=Infinity, lastSrc=-Infinity;
+      included.forEach(function(r){ if(r._src<firstSrc) firstSrc=r._src; if(r._src>lastSrc) lastSrc=r._src; });
+      saldoAnt = dataList[firstSrc].data.saldoAnt;
+      saldoFin = dataList[lastSrc].data.saldoFin;
+      if(dataList.every(function(d){ return d.data.totalCargosDecl!==''; })){
+        totalCargosDecl = String(dataList.reduce(function(s,d){ return s+n(d.data.totalCargosDecl); },0));
+      }
+      if(dataList.every(function(d){ return d.data.totalAbonosDecl!==''; })){
+        totalAbonosDecl = String(dataList.reduce(function(s,d){ return s+n(d.data.totalAbonosDecl); },0));
+      }
+    }
+    if(saldoAnt===''){
+      var lastBefore = excludedBefore.length ? excludedBefore[excludedBefore.length-1] : null;
+      if(lastBefore && lastBefore.saldoAfter!=null && !isNaN(lastBefore.saldoAfter)){
+        saldoAnt = String(Math.round(lastBefore.saldoAfter));
+      } else {
+        var first=included[0];
+        if(first && first.saldoAfter!=null && !isNaN(first.saldoAfter)){
+          saldoAnt = String(Math.round(first.saldoAfter + n(first.cargo) - n(first.abono)));
+        }
+      }
+    }
+    var sumCargo=0, sumAbono=0;
+    included.forEach(function(r){ sumCargo+=n(r.cargo); sumAbono+=n(r.abono); });
+    if(saldoFin===''){
+      var last=included[included.length-1];
+      if(saldoAnt!==''){ saldoFin=String(n(saldoAnt)-sumCargo+sumAbono); }
+      else if(last && last.saldoAfter!=null && !isNaN(last.saldoAfter)){ saldoFin=String(Math.round(last.saldoAfter)); }
+    }
+
+    var lastIncluded=included[included.length-1];
+    var lastD = lastIncluded ? parseAnyDMY(lastIncluded.fecha) : null;
+    var periodo=String(target.m), anio=String(target.y);
+    var primerDia=fmtDMY(1, target.m, target.y);
+    var ultimoDia= lastD ? fmtDMY(lastD.d, lastD.m, lastD.y) : '';
+
+    var finRows = included.map(function(r){
+      return {fecha:r.fecha, tipo:r.tipo, doc:(r.tipo==='T1' && !r.doc) ? periodo : r.doc, cargo:r.cargo, abono:r.abono, desc:r.desc};
+    });
+
+    var note=null;
+    if(multiMonth){
+      var mesesTxt = keys.slice().sort().map(function(k){ var g=groups[k]; return mesNombre(String(g.m))+'-'+g.y; }).join(', ');
+      note = 'Se detectaron movimientos de '+mesesTxt+'. Se conservó '+mesNombre(periodo)+'-'+anio+' ('+included.length+' movimiento(s)); se excluyeron '+(excludedBefore.length+excludedAfter.length)+' movimiento(s) fuera de ese mes.';
+    } else if(dataList.length>1){
+      note = 'Se combinaron '+dataList.length+' archivos de '+mesNombre(periodo)+'-'+anio+' ('+included.length+' movimiento(s) en total).';
+    }
+
+    return {
+      result: {periodo:periodo, anio:anio, saldoAnt:saldoAnt, primerDia:primerDia, ultimoDia:ultimoDia, saldoFin:saldoFin,
+        totalCargosDecl:totalCargosDecl, totalAbonosDecl:totalAbonosDecl, rows:finRows},
+      note: note
+    };
+  }
+
+  // ================= state =================
+  var state = {
+    periodo:'7', anio:'2026', saldoAnt:'4857', primerDia:'01/07/2026', ultimoDia:'31/07/2026', saldoFin:'31108',
+    totalCargosDecl:'21043749', totalAbonosDecl:'21070000',
+    banco:'BCI', empresa:'NORTRANS', isDemo:true,
+    rows:[
+      {fecha:'02/07/2026', tipo:'T1', doc:'7', cargo:'2212', abono:'', desc:'INTERES SOBREGIRO NO PACTADO EN CCT'},
+      {fecha:'06/07/2026', tipo:'T1', doc:'7', cargo:'145728', abono:'', desc:'COM SDO PROM +0,00 UF'},
+      {fecha:'07/07/2026', tipo:'T1', doc:'7', cargo:'', abono:'2000000', desc:'TRANSFER DE NORTRANS LTDA'},
+      {fecha:'07/07/2026', tipo:'T1', doc:'7', cargo:'', abono:'5000000', desc:'TRANSFER DE NORTRANS LTDA'},
+      {fecha:'08/07/2026', tipo:'T1', doc:'7', cargo:'6856917', abono:'', desc:'CARGO POR CUOTA DE LEASING'},
+      {fecha:'10/07/2026', tipo:'T1', doc:'7', cargo:'', abono:'70000', desc:'TRANSFER DE NORTRANS LTDA'},
+      {fecha:'10/07/2026', tipo:'T1', doc:'7', cargo:'62892', abono:'', desc:'CARGO POR CUOTA DE LEASING'},
+      {fecha:'14/07/2026', tipo:'T1', doc:'7', cargo:'', abono:'4000000', desc:'TRANSFER DE NORTRANS LTDA'},
+      {fecha:'14/07/2026', tipo:'T1', doc:'7', cargo:'', abono:'5000000', desc:'TRANSFER DE NORTRANS LTDA'},
+      {fecha:'14/07/2026', tipo:'T1', doc:'7', cargo:'', abono:'5000000', desc:'TRANSFER DE NORTRANS LTDA'},
+      {fecha:'14/07/2026', tipo:'T1', doc:'7', cargo:'13976000', abono:'', desc:'CARGO POR CUOTA DE LEASING'}
+    ]
+  };
+
+  // ---------- rendering ----------
+  var movBody=document.getElementById('movBody');
+  var fields={
+    periodo:document.getElementById('f-periodo'),
+    anio:document.getElementById('f-anio'),
+    saldoAnt:document.getElementById('f-saldoAnt'),
+    primerDia:document.getElementById('f-primerDia'),
+    ultimoDia:document.getElementById('f-ultimoDia'),
+    saldoFin:document.getElementById('f-saldoFin'),
+    banco:document.getElementById('f-banco'),
+    empresa:document.getElementById('f-empresa'),
+    filename:document.getElementById('f-filename')
+  };
+
+  function syncHeaderFields(){
+    fields.periodo.value=state.periodo;
+    fields.anio.value=state.anio;
+    fields.saldoAnt.value=state.saldoAnt;
+    fields.primerDia.value=state.primerDia;
+    fields.ultimoDia.value=state.ultimoDia;
+    fields.saldoFin.value=state.saldoFin;
+    fields.banco.value=state.banco;
+    fields.empresa.value=state.empresa||'NORTRANS';
+  }
+
+  function renderTable(){
+    movBody.innerHTML='';
+    state.rows.forEach(function(row, idx){
+      var tr=document.createElement('tr');
+      if(row.tipo==='CH') tr.className='review';
+      tr.innerHTML =
+        '<td class="col-num" style="color:var(--ink-soft);">'+(idx+1)+'</td>'+
+        '<td><input data-idx="'+idx+'" data-field="fecha" value="'+escAttr(row.fecha)+'"></td>'+
+        '<td><select data-idx="'+idx+'" data-field="tipo" class="tipo" data-val="'+row.tipo+'">'+
+          '<option value="T1"'+(row.tipo==='T1'?' selected':'')+'>T1</option>'+
+          '<option value="CH"'+(row.tipo==='CH'?' selected':'')+'>CH</option>'+
+        '</select></td>'+
+        '<td><input data-idx="'+idx+'" data-field="doc" value="'+escAttr(row.doc)+'"></td>'+
+        '<td><input class="cargo" data-idx="'+idx+'" data-field="cargo" value="'+escAttr(row.cargo)+'"></td>'+
+        '<td><input class="abono" data-idx="'+idx+'" data-field="abono" value="'+escAttr(row.abono)+'"></td>'+
+        '<td class="desc" title="'+escAttr(row.desc)+'">'+escHtml(row.desc)+'</td>'+
+        '<td><button class="rm-btn" data-idx="'+idx+'" title="Eliminar fila">×</button></td>';
+      movBody.appendChild(tr);
+    });
+  }
+  function escHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function escAttr(s){ return escHtml(s); }
+
+  function renderChecks(){
+    var sumCargo=0, sumAbono=0;
+    state.rows.forEach(function(r){ sumCargo+=n(r.cargo); sumAbono+=n(r.abono); });
+    var declCargo=n(state.totalCargosDecl), declAbono=n(state.totalAbonosDecl);
+    var haveDecl = state.totalCargosDecl!=='' || state.totalAbonosDecl!=='';
+    var computedFinal = n(state.saldoAnt) - sumCargo + sumAbono;
+    var declaredFinal = n(state.saldoFin);
+
+    var checks=[];
+    if(haveDecl){
+      checks.push(mkPill(sumCargo===declCargo, 'Cargos', fmt(sumCargo)+' vs. '+fmt(declCargo)+' declarado'));
+      checks.push(mkPill(sumAbono===declAbono, 'Abonos', fmt(sumAbono)+' vs. '+fmt(declAbono)+' declarado'));
+    } else {
+      checks.push(mkPill(true, 'Cargos', fmt(sumCargo)+' (sin total declarado en la cartola)'));
+      checks.push(mkPill(true, 'Abonos', fmt(sumAbono)+' (sin total declarado en la cartola)'));
+    }
+    checks.push(mkPill(computedFinal===declaredFinal, 'Saldo final', fmt(computedFinal)+' vs. '+fmt(declaredFinal)+' de la cartola'));
+
+    var chWithoutDoc = state.rows.filter(function(r){return r.tipo==='CH' && !r.doc;}).length;
+    if(chWithoutDoc>0){
+      checks.push(mkPill(false, 'Cheques', chWithoutDoc+' fila(s) CH sin número — revisa la columna N°/Período'));
+    }
+    var wrap=document.getElementById('checks');
+    wrap.innerHTML='';
+    checks.forEach(function(el){ wrap.appendChild(el); });
+  }
+  function fmt(v){ return v.toLocaleString('es-CL'); }
+  function mkPill(ok, label, detail){
+    var d=document.createElement('div');
+    d.className='pill '+(ok?'ok':'warn');
+    d.innerHTML='<span class="dot"></span><span class="lbl">'+label+':</span> <b>'+detail+'</b>';
+    return d;
+  }
+
+  function buildDelimited(delim){
+    var lines=[];
+    lines.push([state.periodo, state.anio, state.saldoAnt, state.primerDia, state.ultimoDia, state.saldoFin].join(delim));
+    state.rows.forEach(function(r, idx){
+      lines.push([idx+1, r.fecha, r.tipo, r.doc, r.cargo, r.abono].join(delim));
+    });
+    return '﻿'+lines.join('\r\n')+'\r\n';
+  }
+  function buildCsv(){ return buildDelimited(';'); }
+  function buildTxt(){ return buildDelimited('\t'); }
+  function mesNombre(periodo){
+    var i=n(periodo)-1;
+    return (i>=0 && i<12) ? MESES[i] : 'MES'+periodo;
+  }
+  function buildFilename(ext){
+    return 'conciliacion_bnc_'+(state.banco||'BANCO')+'_'+mesNombre(state.periodo)+'.'+ext;
+  }
+  function refreshOutputs(){
+    renderChecks();
+    var csv=buildCsv();
+    document.getElementById('preview').value=csv;
+    fields.filename.value=buildFilename('csv');
+  }
+
+  function applyParsed(banco, fin){
+    state.periodo=fin.periodo; state.anio=fin.anio; state.saldoAnt=fin.saldoAnt;
+    state.primerDia=fin.primerDia; state.ultimoDia=fin.ultimoDia; state.saldoFin=fin.saldoFin;
+    state.totalCargosDecl=fin.totalCargosDecl; state.totalAbonosDecl=fin.totalAbonosDecl;
+    state.rows=fin.rows; state.isDemo=false; state.banco=BANK_LABEL[banco]||banco;
+    document.getElementById('demoBadge').style.display='none';
+    var badge=document.getElementById('bankBadge');
+    badge.textContent=state.banco;
+    badge.style.display='inline-flex';
+    syncHeaderFields();
+    renderTable();
+    refreshOutputs();
+    scheduleGhCheck();
+  }
+
+  // ---------- events: table ----------
+  movBody.addEventListener('input', function(e){
+    var t=e.target;
+    var idx=t.getAttribute('data-idx'), field=t.getAttribute('data-field');
+    if(idx==null) return;
+    idx=parseInt(idx,10);
+    if(field==='cargo' || field==='abono'){
+      state.rows[idx][field]=t.value.replace(/[^0-9]/g,'');
+      if(t.value !== state.rows[idx][field]) t.value=state.rows[idx][field];
+    } else {
+      state.rows[idx][field]=t.value;
+    }
+    refreshOutputs();
+  });
+  movBody.addEventListener('change', function(e){
+    var t=e.target;
+    if(t.tagName==='SELECT'){
+      var idx=parseInt(t.getAttribute('data-idx'),10);
+      state.rows[idx].tipo=t.value;
+      t.setAttribute('data-val', t.value);
+      t.closest('tr').className = t.value==='CH' ? 'review' : '';
+      refreshOutputs();
+    }
+  });
+  movBody.addEventListener('click', function(e){
+    if(e.target.classList.contains('rm-btn')){
+      var idx=parseInt(e.target.getAttribute('data-idx'),10);
+      state.rows.splice(idx,1);
+      renderTable();
+      refreshOutputs();
+    }
+  });
+  document.getElementById('addRowBtn').addEventListener('click', function(){
+    state.rows.push({fecha:state.ultimoDia||'', tipo:'T1', doc:state.periodo||'', cargo:'', abono:'', desc:''});
+    renderTable();
+    refreshOutputs();
+  });
+  Object.keys(fields).forEach(function(key){
+    if(key==='filename') return;
+    fields[key].addEventListener('input', function(){
+      if(key==='banco'){ state.banco=fields.banco.value; }
+      else { state[key]=fields[key].value; }
+      refreshOutputs();
+      scheduleGhCheck();
+    });
+    if(key==='empresa'){
+      fields.empresa.addEventListener('change', function(){
+        state.empresa=fields.empresa.value;
+        scheduleGhCheck();
+      });
+    }
+  });
+
+  // ---------- events: file upload (BCI / Chile / Estado / Santander / Itaú) ----------
+  function readFileAsWorkbook(file){
+    return new Promise(function(resolve, reject){
+      var reader=new FileReader();
+      reader.onload=function(ev){
+        try{
+          var data=new Uint8Array(ev.target.result);
+          var xwb=XLSX.read(data, {type:'array', raw:true});
+          var wb={SheetNames:xwb.SheetNames, aoas:{}};
+          xwb.SheetNames.forEach(function(nm){
+            wb.aoas[nm]=XLSX.utils.sheet_to_json(xwb.Sheets[nm], {header:1, raw:true, defval:''});
+          });
+          resolve(wb);
+        }catch(err){ reject(err); }
+      };
+      reader.onerror=function(){ reject(new Error('no pude leer "'+file.name+'"')); };
+      reader.readAsArrayBuffer(file);
+    });
+  }
+  document.getElementById('fileInput').addEventListener('change', function(e){
+    var files=Array.prototype.slice.call(e.target.files||[]);
+    if(!files.length) return;
+    var status=document.getElementById('fileStatus');
+    if(files.some(function(f){ return /\.pdf$/i.test(f.name); })){
+      status.textContent='Ese es un PDF — Scotiabank se procesa pegando el texto abajo, no subiendo el archivo.';
+      return;
+    }
+    status.textContent='Leyendo '+files.length+' archivo'+(files.length>1?'s':'')+'…';
+    Promise.all(files.map(readFileAsWorkbook)).then(function(wbs){
+      var dataList=[], banco=null;
+      for(var i=0;i<wbs.length;i++){
+        var det=detectAndParse(wbs[i]);
+        if(banco===null){ banco=det.banco; }
+        else if(det.banco!==banco){
+          throw new Error('"'+files[i].name+'" parece ser de otro banco ('+(BANK_LABEL[det.banco]||det.banco)+') distinto al resto ('+(BANK_LABEL[banco]||banco)+'). Sube archivos de un solo banco a la vez.');
+        }
+        dataList.push({banco:det.banco, data:det.data});
+      }
+      var merged=mergeAndFinalize(dataList);
+      applyParsed(banco, merged.result);
+      var base = files.length===1 ? '"'+files[0].name+'"' : files.length+' archivos';
+      var msg = base+' — '+BANK_LABEL[banco]+', '+merged.result.rows.length+' movimiento(s) encontrados.';
+      if(merged.note) msg += ' '+merged.note;
+      status.textContent=msg;
+    }).catch(function(err){
+      status.textContent='No pude leer el/los archivo(s): '+(err&&err.message?err.message:err);
+    });
+  });
+
+  // ---------- events: Scotiabank pasted text ----------
+  document.getElementById('scotiaBtn').addEventListener('click', function(){
+    var status=document.getElementById('fileStatus');
+    var text=document.getElementById('scotiaPaste').value;
+    if(!text.trim()){ status.textContent='Pega primero el texto de la cartola de Scotiabank.'; return; }
+    try{
+      if(!sniffScotiabankText(text)) throw new Error('No reconozco este texto como cartola de Scotiabank (¿pegaste el "Estado de Cuenta" completo?).');
+      var data=parseScotiabankText(text);
+      var fin=finalizeParsed(data);
+      applyParsed('SCOTIABANK', fin);
+      status.textContent='Texto de Scotiabank — '+fin.rows.length+' movimiento(s) encontrados.';
+    }catch(err){
+      status.textContent='No pude leer el texto: '+err.message;
+    }
+  });
+
+  // ---------- download ----------
+  var saveMsg=document.getElementById('saveMsg');
+  document.getElementById('dlBtn').addEventListener('click', function(){
+    saveMsg.textContent='';
+    saveMsg.className='save-msg';
+    try{
+      var csv=buildCsv();
+      var blob=new Blob([csv], {type:'text/csv;charset=utf-8'});
+      var url=URL.createObjectURL(blob);
+      var a=document.createElement('a');
+      a.href=url;
+      a.download=fields.filename.value || 'conciliacion.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+      saveMsg.textContent='Descargado.';
+      saveMsg.className='save-msg ok';
+    }catch(err){
+      saveMsg.textContent='No se pudo descargar: '+(err&&err.message?err.message:'intenta de nuevo.');
+      saveMsg.className='save-msg err';
+    }
+  });
+  document.getElementById('dlBtnTxt').addEventListener('click', function(){
+    saveMsg.textContent='';
+    saveMsg.className='save-msg';
+    try{
+      var txt=buildTxt();
+      var blob2=new Blob([txt], {type:'text/plain;charset=utf-8'});
+      var url2=URL.createObjectURL(blob2);
+      var a2=document.createElement('a');
+      a2.href=url2;
+      a2.download=buildFilename('txt');
+      document.body.appendChild(a2);
+      a2.click();
+      document.body.removeChild(a2);
+      setTimeout(function(){ URL.revokeObjectURL(url2); }, 1000);
+      saveMsg.textContent='Descargado.';
+      saveMsg.className='save-msg ok';
+    }catch(err){
+      saveMsg.textContent='No se pudo descargar: '+(err&&err.message?err.message:'intenta de nuevo.');
+      saveMsg.className='save-msg err';
+    }
+  });
+  document.getElementById('copyBtn').addEventListener('click', function(){
+    var ta=document.getElementById('preview');
+    ta.select();
+    try{
+      document.execCommand('copy');
+      saveMsg.textContent='Texto copiado al portapapeles.';
+      saveMsg.className='save-msg ok';
+    }catch(e){
+      saveMsg.textContent='No pude copiar automáticamente — selecciona el texto y usa Ctrl/Cmd+C.';
+      saveMsg.className='save-msg err';
+    }
+  });
+
+  // ---------- historial en GitHub ----------
+  var GH_CFG_KEY='conciliadorGithubCfg_v1';
+  function loadGhCfg(){
+    try{ return JSON.parse(localStorage.getItem(GH_CFG_KEY)||'null') || {}; }catch(e){ return {}; }
+  }
+  function saveGhCfg(cfg){
+    try{ localStorage.setItem(GH_CFG_KEY, JSON.stringify(cfg)); }catch(e){}
+  }
+  function ghHeaders(token){
+    return {'Authorization':'Bearer '+token, 'Accept':'application/vnd.github+json', 'X-GitHub-Api-Version':'2022-11-28'};
+  }
+  function b64EncodeUtf8(str){
+    var bytes=new TextEncoder().encode(str);
+    var binary='';
+    bytes.forEach(function(b){ binary+=String.fromCharCode(b); });
+    return btoa(binary);
+  }
+  function b64DecodeUtf8(b64){
+    var binary=atob(String(b64).replace(/\n/g,''));
+    var bytes=new Uint8Array(binary.length);
+    for(var i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
+    return new TextDecoder('utf-8').decode(bytes);
+  }
+  function ghGetHistorial(cfg){
+    var url='https://api.github.com/repos/'+cfg.owner+'/'+cfg.repo+'/contents/'+encodeURIComponent(cfg.path||'historial.json')+'?ref='+encodeURIComponent(cfg.branch||'main');
+    return fetch(url, {headers:ghHeaders(cfg.token)}).then(function(r){
+      if(r.status===404){ return {data:{version:1, registros:[]}, sha:null}; }
+      if(!r.ok) return r.text().then(function(t){ throw new Error('GitHub respondió '+r.status+' al leer el historial: '+t.slice(0,200)); });
+      return r.json().then(function(j){
+        var data;
+        try{ data=JSON.parse(b64DecodeUtf8(j.content)); }catch(e){ data={version:1, registros:[]}; }
+        if(!data.registros) data.registros=[];
+        return {data:data, sha:j.sha};
+      });
+    });
+  }
+  function ghPutHistorial(cfg, data, sha, message){
+    var url='https://api.github.com/repos/'+cfg.owner+'/'+cfg.repo+'/contents/'+encodeURIComponent(cfg.path||'historial.json');
+    var body={message:message||'Actualiza historial de conciliaciones', content:b64EncodeUtf8(JSON.stringify(data,null,2)), branch:cfg.branch||'main'};
+    if(sha) body.sha=sha;
+    return fetch(url, {method:'PUT', headers:Object.assign({'Content-Type':'application/json'}, ghHeaders(cfg.token)), body:JSON.stringify(body)}).then(function(r){
+      if(!r.ok) return r.text().then(function(t){ throw new Error('GitHub respondió '+r.status+' al guardar: '+t.slice(0,200)); });
+      return r.json();
+    });
+  }
+  function prevPeriod(anio, periodo){
+    var a=parseInt(anio,10), p=parseInt(periodo,10);
+    if(isNaN(a) || isNaN(p)) return null;
+    p-=1;
+    if(p<1){ p=12; a-=1; }
+    return {anio:String(a), periodo:String(p)};
+  }
+  function findRegistro(registros, empresa, banco, anio, periodo){
+    for(var i=registros.length-1;i>=0;i--){
+      var r=registros[i];
+      if(r.empresa===empresa && r.banco===banco && String(r.anio)===String(anio) && String(r.periodo)===String(periodo)) return r;
+    }
+    return null;
+  }
+  function fmtMiles(x){
+    var num=Number(x);
+    return isNaN(num) ? String(x) : num.toLocaleString('es-CL');
+  }
+  function renderGhCheckPill(state2, text){
+    var el=document.getElementById('ghCheck');
+    if(!el) return;
+    var cls = state2==='ok' ? 'ok' : (state2==='warn' ? 'warn' : '');
+    if(cls){
+      el.innerHTML='<div class="pill '+cls+'"><span class="dot"></span><span class="lbl">'+escHtml(text)+'</span></div>';
+    } else {
+      el.innerHTML='<div class="pill" style="background:var(--paper-deep); color:var(--ink-soft);"><span class="lbl">'+escHtml(text)+'</span></div>';
+    }
+  }
+  var ghCheckToken=0;
+  function scheduleGhCheck(){
+    clearTimeout(window.__ghCheckTimer);
+    window.__ghCheckTimer=setTimeout(runGhCheck, 350);
+  }
+  function runGhCheck(){
+    var myToken=++ghCheckToken;
+    var cfg=loadGhCfg();
+    if(!cfg.owner || !cfg.repo || !cfg.token){
+      renderGhCheckPill(null, 'Configura la conexión con GitHub arriba para activar este chequeo.');
+      return;
+    }
+    var empresa=fields.empresa.value, banco=fields.banco.value, anio=fields.anio.value, periodo=fields.periodo.value, saldoAnt=fields.saldoAnt.value;
+    if(!empresa || !banco || !anio || !periodo){
+      renderGhCheckPill(null, 'Completa empresa, banco, período y año para chequear contra el historial.');
+      return;
+    }
+    var prev=prevPeriod(anio, periodo);
+    if(!prev) return;
+    renderGhCheckPill(null, 'Consultando historial en GitHub…');
+    ghGetHistorial(cfg).then(function(res){
+      if(myToken!==ghCheckToken) return;
+      var prevReg=findRegistro(res.data.registros, empresa, banco, prev.anio, prev.periodo);
+      if(!prevReg){
+        renderGhCheckPill(null, 'Sin historial guardado de '+mesNombre(prev.periodo)+'-'+prev.anio+' para '+empresa+' / '+(BANK_LABEL[banco]||banco)+' todavía.');
+        return;
+      }
+      var a=Math.round(n(saldoAnt)), b=Math.round(n(prevReg.saldoFin));
+      if(saldoAnt!=='' && a===b){
+        renderGhCheckPill('ok', 'Saldo anterior coincide con el saldo final guardado de '+mesNombre(prev.periodo)+'-'+prev.anio+' ('+fmtMiles(b)+').');
+      } else {
+        renderGhCheckPill('warn', 'Saldo anterior ('+fmtMiles(a)+') no coincide con el saldo final guardado de '+mesNombre(prev.periodo)+'-'+prev.anio+' ('+fmtMiles(b)+').');
+      }
+    }).catch(function(err){
+      if(myToken!==ghCheckToken) return;
+      renderGhCheckPill('warn', 'No pude consultar GitHub: '+(err&&err.message?err.message:err));
+    });
+  }
+  (function initGhCfgUI(){
+    var cfg=loadGhCfg();
+    if(cfg.owner) document.getElementById('gh-owner').value=cfg.owner;
+    if(cfg.repo) document.getElementById('gh-repo').value=cfg.repo;
+    document.getElementById('gh-branch').value=cfg.branch||'main';
+    if(cfg.token) document.getElementById('gh-token').value=cfg.token;
+  })();
+  document.getElementById('ghSaveCfgBtn').addEventListener('click', function(){
+    var msgEl=document.getElementById('ghCfgMsg');
+    var cfg={
+      owner:document.getElementById('gh-owner').value.trim(),
+      repo:document.getElementById('gh-repo').value.trim(),
+      branch:document.getElementById('gh-branch').value.trim()||'main',
+      token:document.getElementById('gh-token').value.trim(),
+      path:'historial.json'
+    };
+    if(!cfg.owner || !cfg.repo || !cfg.token){
+      msgEl.textContent='Completa usuario/organización, repositorio y token.';
+      msgEl.className='save-msg err';
+      return;
+    }
+    saveGhCfg(cfg);
+    msgEl.textContent='Conexión guardada en este navegador.';
+    msgEl.className='save-msg ok';
+    scheduleGhCheck();
+  });
+  document.getElementById('ghSaveBtn').addEventListener('click', function(){
+    var msgEl=document.getElementById('ghSaveMsg');
+    msgEl.textContent=''; msgEl.className='save-msg';
+    var cfg=loadGhCfg();
+    if(!cfg.owner || !cfg.repo || !cfg.token){
+      msgEl.textContent='Primero configura la conexión con GitHub (arriba).';
+      msgEl.className='save-msg err';
+      return;
+    }
+    var empresa=fields.empresa.value, banco=fields.banco.value, anio=fields.anio.value, periodo=fields.periodo.value;
+    if(!empresa || !banco || !anio || !periodo){
+      msgEl.textContent='Completa empresa, banco, período y año antes de guardar.';
+      msgEl.className='save-msg err';
+      return;
+    }
+    var registro={
+      empresa:empresa, banco:banco, periodo:String(periodo), anio:String(anio),
+      primerDia:fields.primerDia.value, ultimoDia:fields.ultimoDia.value,
+      saldoAnt:fields.saldoAnt.value, saldoFin:fields.saldoFin.value,
+      guardadoEn:new Date().toISOString()
+    };
+    msgEl.textContent='Guardando en GitHub…';
+    ghGetHistorial(cfg).then(function(res){
+      var registros=res.data.registros||[];
+      var idx=-1;
+      for(var i=0;i<registros.length;i++){
+        var r=registros[i];
+        if(r.empresa===empresa && r.banco===banco && String(r.anio)===anio && String(r.periodo)===periodo){ idx=i; break; }
+      }
+      if(idx>=0) registros[idx]=registro; else registros.push(registro);
+      var data={version:1, registros:registros};
+      var msg='Conciliación '+empresa+' / '+(BANK_LABEL[banco]||banco)+' — '+mesNombre(periodo)+'-'+anio;
+      return ghPutHistorial(cfg, data, res.sha, msg);
+    }).then(function(){
+      msgEl.textContent='Guardado en el historial de GitHub.';
+      msgEl.className='save-msg ok';
+      scheduleGhCheck();
+    }).catch(function(err){
+      msgEl.textContent='No se pudo guardar: '+(err&&err.message?err.message:err);
+      msgEl.className='save-msg err';
+    });
+  });
+
+  // ---------- init ----------
+  syncHeaderFields();
+  renderTable();
+  refreshOutputs();
+  scheduleGhCheck();
+})();
+</script>
